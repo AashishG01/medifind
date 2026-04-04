@@ -1,0 +1,421 @@
+[
+    {
+        "keywords": [
+            "neck pain",
+            "cervical",
+            "stiff neck",
+            "neck stiffness"
+        ],
+        "keywordsGu": [
+            "ગરદનમાં દુખાવો",
+            "ગરદન જકડાવું"
+        ],
+        "specialists": [
+            "Orthopedic Surgeon",
+            "Neurologist",
+            "Physiotherapist"
+        ],
+        "specialistsGu": [
+            "ઓર્થોપેડિક સર્જન",
+            "ન્યુરોલોજિસ્ટ",
+            "ફિઝિયોથેરાપિસ્ટ"
+        ],
+        "explanation": "Neck pain can be caused by muscle tension, nerve compression, or spinal issues. Start with an orthopedic evaluation. If numbness or tingling is present, see a neurologist. For chronic tension, a physiotherapist may help most.",
+        "explanationGu": "ગરદનનો દુખાવો સ્નાયુ તણાવ, ચેતા સંકોચન અથવા કરોડરજ્જુની સમસ્યાને કારણે થઈ શકે છે. ઓર્થોપેડિક ડૉક્ટરને બતાવો. જો સુન્ન થવું અથવા ઝણઝણાટ હોય તો ન્યુરોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "chest pain",
+            "chest tightness",
+            "chest discomfort",
+            "heart pain"
+        ],
+        "keywordsGu": [
+            "છાતીમાં દુખાવો",
+            "છાતી ભારે લાગવી"
+        ],
+        "specialists": [
+            "Cardiologist",
+            "Pulmonologist"
+        ],
+        "specialistsGu": [
+            "કાર્ડિયોલોજિસ્ટ",
+            "પલ્મોનોલોજિસ્ટ"
+        ],
+        "explanation": "Chest pain can indicate heart problems or lung issues. If pain is sharp and worsens with breathing, see a pulmonologist. If pain radiates to arm/jaw or comes with sweating, seek a cardiologist URGENTLY.",
+        "explanationGu": "છાતીમાં દુખાવો હૃદય અથવા ફેફસાની સમસ્યા સૂચવી શકે છે. જો દુખાવો હાથ/જડબા સુધી ફેલાય તો તાત્કાલિક કાર્ડિયોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "high"
+    },
+    {
+        "keywords": [
+            "headache",
+            "migraine",
+            "head pain",
+            "throbbing head"
+        ],
+        "keywordsGu": [
+            "માથાનો દુખાવો",
+            "માઈગ્રેન"
+        ],
+        "specialists": [
+            "Neurologist",
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "ન્યુરોલોજિસ્ટ",
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "Occasional headaches can be managed by a general physician. For recurring, severe, or pattern-based headaches (like migraines), a neurologist is recommended.",
+        "explanationGu": "ક્યારેક-ક્યારેક માથાનો દુખાવો જનરલ ફિઝિશિયન દ્વારા સારવાર થઈ શકે. વારંવાર, ગંભીર માથાના દુખાવા માટે ન્યુરોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "low"
+    },
+    {
+        "keywords": [
+            "stomach pain",
+            "abdominal pain",
+            "digestion",
+            "acidity",
+            "gas",
+            "bloating"
+        ],
+        "keywordsGu": [
+            "પેટમાં દુખાવો",
+            "પાચન",
+            "એસિડિટી",
+            "ગેસ"
+        ],
+        "specialists": [
+            "Gastroenterologist",
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "ગેસ્ટ્રોએન્ટેરોલોજિસ્ટ",
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "Mild acidity or gas can be treated by a general physician. For persistent stomach pain, blood in stool, or difficulty swallowing, consult a gastroenterologist.",
+        "explanationGu": "હળવી એસિડિટી અથવા ગેસ જનરલ ફિઝિશિયન દ્વારા સારવાર થઈ શકે. લાંબા સમયના પેટના દુખાવા માટે ગેસ્ટ્રોએન્ટેરોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "back pain",
+            "lower back",
+            "spine pain",
+            "sciatica"
+        ],
+        "keywordsGu": [
+            "કમરનો દુખાવો",
+            "પીઠનો દુખાવો",
+            "કરોડરજ્જુ"
+        ],
+        "specialists": [
+            "Orthopedic Surgeon",
+            "Physiotherapist",
+            "Neurologist"
+        ],
+        "specialistsGu": [
+            "ઓર્થોપેડિક સર્જન",
+            "ફિઝિયોથેરાપિસ્ટ",
+            "ન્યુરોલોજિસ્ટ"
+        ],
+        "explanation": "Back pain is often muscular and responds well to physiotherapy. If pain shoots down legs (sciatica), see an orthopedic surgeon. If numbness is present, a neurologist may be needed.",
+        "explanationGu": "કમરનો દુખાવો ઘણીવાર સ્નાયુઓને કારણે હોય છે અને ફિઝિયોથેરાપીથી સારો થાય છે. જો દુખાવો પગ સુધી ફેલાય તો ઓર્થોપેડિક ડૉક્ટર પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "skin rash",
+            "itching",
+            "acne",
+            "pimples",
+            "eczema",
+            "skin allergy"
+        ],
+        "keywordsGu": [
+            "ત્વચા પર ફોલ્લા",
+            "ખંજવાળ",
+            "ખીલ",
+            "ત્વચા એલર્જી"
+        ],
+        "specialists": [
+            "Dermatologist"
+        ],
+        "specialistsGu": [
+            "ડર્મેટોલોજિસ્ટ"
+        ],
+        "explanation": "Skin rashes, persistent acne, eczema, and allergic reactions should be evaluated by a dermatologist for proper diagnosis and treatment.",
+        "explanationGu": "ત્વચા પર ફોલ્લા, ખીલ, ખરજવું અને એલર્જી માટે ડર્મેટોલોજિસ્ટને બતાવો.",
+        "urgency": "low"
+    },
+    {
+        "keywords": [
+            "fever",
+            "high temperature",
+            "cold",
+            "cough",
+            "flu",
+            "viral"
+        ],
+        "keywordsGu": [
+            "તાવ",
+            "શરદી",
+            "ખાંસી",
+            "વાયરલ"
+        ],
+        "specialists": [
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "Common fever, cold, and cough are best treated by a general physician. If fever persists beyond 5 days or is very high (103°F+), seek immediate medical attention.",
+        "explanationGu": "સામાન્ય તાવ, શરદી અને ખાંસી માટે જનરલ ફિઝિશિયન પાસે જાવ. જો તાવ 5 દિવસથી વધુ ચાલે તો તાત્કાલિક ડૉક્ટર પાસે જાવ.",
+        "urgency": "low"
+    },
+    {
+        "keywords": [
+            "joint pain",
+            "knee pain",
+            "arthritis",
+            "swelling joint"
+        ],
+        "keywordsGu": [
+            "સાંધાનો દુખાવો",
+            "ઘૂંટણનો દુખાવો",
+            "સાંધાનો સોજો"
+        ],
+        "specialists": [
+            "Orthopedic Surgeon",
+            "Rheumatologist"
+        ],
+        "specialistsGu": [
+            "ઓર્થોપેડિક સર્જન",
+            "રુમેટોલોજિસ્ટ"
+        ],
+        "explanation": "Joint pain from injury or wear-and-tear should be seen by an orthopedic surgeon. If multiple joints are affected or you suspect autoimmune arthritis, a rheumatologist is better.",
+        "explanationGu": "ઈજા અથવા ઘસારાથી સાંધાનો દુખાવો ઓર્થોપેડિક ડૉક્ટરને બતાવો. જો ઘણા સાંધામાં દુખાવો હોય તો રુમેટોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "eye pain",
+            "blurry vision",
+            "vision problem",
+            "eye redness"
+        ],
+        "keywordsGu": [
+            "આંખમાં દુખાવો",
+            "ઝાંખું દેખાવું",
+            "આંખ લાલ થવી"
+        ],
+        "specialists": [
+            "Ophthalmologist"
+        ],
+        "specialistsGu": [
+            "આંખના નિષ્ણાત"
+        ],
+        "explanation": "Eye pain, blurred vision, or sudden vision changes need evaluation by an ophthalmologist. If sudden vision loss occurs, seek emergency care immediately.",
+        "explanationGu": "આંખમાં દુખાવો, ઝાંખું દેખાવું અથવા દ્રષ્ટિમાં અચાનક ફેરફાર માટે આંખના ડૉક્ટર પાસે તાત્કાલિક જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "tooth pain",
+            "dental",
+            "gum problem",
+            "cavity",
+            "toothache"
+        ],
+        "keywordsGu": [
+            "દાંતમાં દુખાવો",
+            "દાંતનું દર્દ",
+            "પેઢાની સમસ્યા"
+        ],
+        "specialists": [
+            "Dentist"
+        ],
+        "specialistsGu": [
+            "દંત ચિકિત્સક"
+        ],
+        "explanation": "Toothaches, cavities, gum bleeding, and dental issues should be promptly treated by a dentist. Delaying dental care often makes the problem worse and more expensive.",
+        "explanationGu": "દાંતના દુખાવા, કેવિટી અને પેઢાની સમસ્યા માટે દંત ચિકિત્સક પાસે જાવ. વિલંબ કરવાથી સમસ્યા વધી શકે છે.",
+        "urgency": "low"
+    },
+    {
+        "keywords": [
+            "anxiety",
+            "depression",
+            "stress",
+            "panic attack",
+            "mental health",
+            "sleep problem",
+            "insomnia"
+        ],
+        "keywordsGu": [
+            "ચિંતા",
+            "ડિપ્રેશન",
+            "તણાવ",
+            "ઊંઘ ન આવવી"
+        ],
+        "specialists": [
+            "Psychiatrist",
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "માનસિક રોગ નિષ્ણાત",
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "Persistent anxiety, depression, or sleep problems should be discussed with a psychiatrist. For mild stress, a general physician can help initially. There is no stigma in seeking mental health support.",
+        "explanationGu": "સતત ચિંતા, ડિપ્રેશન અથવા ઊંઘની સમસ્યા માટે માનસિક રોગ નિષ્ણાત પાસે જાવ. માનસિક સ્વાસ્થ્ય માટે મદદ લેવામાં કોઈ શરમ નથી.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "ear pain",
+            "hearing loss",
+            "tinnitus",
+            "ear infection",
+            "sinus",
+            "nose block"
+        ],
+        "keywordsGu": [
+            "કાનમાં દુખાવો",
+            "સાંભળવામાં તકલીફ",
+            "સાઈનસ",
+            "નાક બંધ"
+        ],
+        "specialists": [
+            "ENT Specialist"
+        ],
+        "specialistsGu": [
+            "ENT નિષ્ણાત"
+        ],
+        "explanation": "Ear infections, hearing issues, sinus problems, and persistent nasal congestion should be evaluated by an ENT specialist.",
+        "explanationGu": "કાનના ચેપ, સાંભળવાની સમસ્યા, સાઈનસ અને નાક બંધ થવા માટે ENT નિષ્ણાત પાસે જાવ.",
+        "urgency": "low"
+    },
+    {
+        "keywords": [
+            "diabetes",
+            "sugar",
+            "blood sugar",
+            "high sugar",
+            "frequent urination",
+            "excessive thirst"
+        ],
+        "keywordsGu": [
+            "ડાયાબિટીસ",
+            "શુગર",
+            "વારંવાર પેશાબ",
+            "વધુ તરસ"
+        ],
+        "specialists": [
+            "Endocrinologist",
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "એન્ડોક્રિનોલોજિસ્ટ",
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "If you suspect diabetes or have uncontrolled blood sugar, an endocrinologist provides specialized care. For initial screening, a general physician can order basic tests.",
+        "explanationGu": "જો ડાયાબિટીસની શંકા હોય અથવા શુગર કંટ્રોલમાં ન હોય તો એન્ડોક્રિનોલોજિસ્ટ પાસે જાવ. પ્રારંભિક તપાસ માટે જનરલ ફિઝિશિયન પણ મદદ કરી શકે.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "breathing problem",
+            "shortness of breath",
+            "asthma",
+            "wheezing",
+            "cough with blood"
+        ],
+        "keywordsGu": [
+            "શ્વાસ લેવામાં તકલીફ",
+            "અસ્થમા",
+            "ઘરઘરાટી"
+        ],
+        "specialists": [
+            "Pulmonologist",
+            "General Physician"
+        ],
+        "specialistsGu": [
+            "પલ્મોનોલોજિસ્ટ",
+            "જનરલ ફિઝિશિયન"
+        ],
+        "explanation": "Difficulty breathing, chronic cough, or wheezing should be evaluated by a pulmonologist. If coughing blood, seek emergency care immediately.",
+        "explanationGu": "શ્વાસ લેવામાં તકલીફ, લાંબી ખાંસી અથવા ઘરઘરાટી માટે પલ્મોનોલોજિસ્ટ પાસે જાવ. ખાંસીમાં લોહી આવે તો તાત્કાલિક ડૉક્ટર પાસે જાવ.",
+        "urgency": "high"
+    },
+    {
+        "keywords": [
+            "pregnancy",
+            "missed period",
+            "prenatal",
+            "baby",
+            "delivery"
+        ],
+        "keywordsGu": [
+            "ગર્ભાવસ્થા",
+            "માસિક ન આવવું",
+            "ડિલિવરી"
+        ],
+        "specialists": [
+            "Gynecologist"
+        ],
+        "specialistsGu": [
+            "ગાયનેકોલોજિસ્ટ"
+        ],
+        "explanation": "For pregnancy-related concerns, missed periods, or prenatal care, consult a gynecologist. Early and regular prenatal visits are important for a healthy pregnancy.",
+        "explanationGu": "ગર્ભાવસ્થા, માસિક ન આવવું અથવા પ્રિનેટલ કેર માટે ગાયનેકોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "child fever",
+            "child cough",
+            "vaccination",
+            "baby sick",
+            "growth problem"
+        ],
+        "keywordsGu": [
+            "બાળકને તાવ",
+            "બાળકને ખાંસી",
+            "રસીકરણ",
+            "બાળક બીમાર"
+        ],
+        "specialists": [
+            "Pediatrician"
+        ],
+        "specialistsGu": [
+            "બાળરોગ નિષ્ણાત"
+        ],
+        "explanation": "For any illness in children under 12, consult a pediatrician. They are trained specifically for children's health needs, dosages, and developmental concerns.",
+        "explanationGu": "12 વર્ષથી નાના બાળકોની કોઈપણ બીમારી માટે બાળરોગ નિષ્ણાત પાસે જાવ.",
+        "urgency": "medium"
+    },
+    {
+        "keywords": [
+            "thyroid",
+            "weight gain",
+            "fatigue",
+            "hormonal",
+            "PCOS"
+        ],
+        "keywordsGu": [
+            "થાઈરોઈડ",
+            "વજન વધવું",
+            "થાક",
+            "હોર્મોનલ"
+        ],
+        "specialists": [
+            "Endocrinologist"
+        ],
+        "specialistsGu": [
+            "એન્ડોક્રિનોલોજિસ્ટ"
+        ],
+        "explanation": "Thyroid problems, unexplained weight gain, PCOS, and hormonal imbalances need specialized evaluation by an endocrinologist.",
+        "explanationGu": "થાઈરોઈડ, અસ્પષ્ટ વજન વધારો, PCOS અને હોર્મોનલ સમસ્યાઓ માટે એન્ડોક્રિનોલોજિસ્ટ પાસે જાવ.",
+        "urgency": "low"
+    }
+]
