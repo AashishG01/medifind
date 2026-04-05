@@ -54,7 +54,11 @@ export const gu = {
     upcoming: 'આગામી', no_upcoming: 'કોઈ આગામી એપોઇન્ટમેન્ટ નથી',
 };
 
+
+
 export function t(key, lang) {
     if (lang === 'gu' && gu[key]) return gu[key];
     return null;
 }
+
+
