@@ -684,11 +684,173 @@ const healthRecords = [
     { id: 5, type: "Discharge Summary", typeGu: "ડિસ્ચાર્જ સમરી", date: "2025-08-05", facility: "BAPS Hospital, Surat", doctor: "Dr. Rajesh Mehta", summary: "Admitted for right knee arthroscopy. Procedure successful. Discharged on Day 2. Follow-up in 2 weeks.", summaryGu: "જમણા ઘૂંટણની આર્થ્રોસ્કોપી માટે દાખલ. પ્રક્રિયા સફળ. 2 દિવસે રજા. 2 અઠવાડિયામાં ફોલો-અપ." }
 ];
 
-// In-memory state mimicking backend
-let appointments = [];
-let secondOpinions = [];
-let appointmentIdCounter = 1;
-let soIdCounter = 1;
+// In-memory state mimicking backend — PRE-LOADED for demo
+let appointments = [
+    { id: 1, doctorId: 1, doctorName: 'Dr. Rajesh Mehta', doctorSpecialty: 'Orthopedic Surgeon', clinicAddress: '304, Shreeji Complex, Vesu Main Road, Surat - 395007', patientName: 'Rameshbhai Patel', phone: '+91 98765 43210', date: new Date().toISOString().split('T')[0], time: '10:00 AM', concern: 'Severe knee pain for 2 weeks, difficulty climbing stairs. Previous arthroscopy in Aug 2025.', shareRecords: true, status: 'Confirmed', createdAt: new Date(Date.now() - 3600000).toISOString() },
+    { id: 2, doctorId: 1, doctorName: 'Dr. Rajesh Mehta', doctorSpecialty: 'Orthopedic Surgeon', clinicAddress: '304, Shreeji Complex, Vesu Main Road, Surat - 395007', patientName: 'Sureshbhai Modi', phone: '+91 99887 76543', date: new Date().toISOString().split('T')[0], time: '11:00 AM', concern: 'Lower back pain radiating to left leg since 10 days. Taking painkillers but not helping.', shareRecords: true, status: 'Confirmed', createdAt: new Date(Date.now() - 7200000).toISOString() },
+    { id: 3, doctorId: 1, doctorName: 'Dr. Rajesh Mehta', doctorSpecialty: 'Orthopedic Surgeon', clinicAddress: '304, Shreeji Complex, Vesu Main Road, Surat - 395007', patientName: 'Meena Sharma', phone: '+91 98123 45678', date: new Date().toISOString().split('T')[0], time: '12:00 PM', concern: 'Right shoulder frozen, cannot lift arm above head. Started 3 weeks ago after a fall.', shareRecords: false, status: 'Confirmed', createdAt: new Date(Date.now() - 10800000).toISOString() },
+    { id: 4, doctorId: 1, doctorName: 'Dr. Rajesh Mehta', doctorSpecialty: 'Orthopedic Surgeon', clinicAddress: '304, Shreeji Complex, Vesu Main Road, Surat - 395007', patientName: 'Jayeshbhai Patel', phone: '+91 97654 32100', date: new Date(Date.now() - 86400000).toISOString().split('T')[0], time: '5:00 PM', concern: 'Post-surgery follow-up for knee replacement done 6 weeks ago.', shareRecords: true, status: 'Completed', createdAt: new Date(Date.now() - 86400000).toISOString() },
+    { id: 5, doctorId: 1, doctorName: 'Dr. Rajesh Mehta', doctorSpecialty: 'Orthopedic Surgeon', clinicAddress: '304, Shreeji Complex, Vesu Main Road, Surat - 395007', patientName: 'Heena Desai', phone: '+91 91234 56789', date: new Date(Date.now() - 172800000).toISOString().split('T')[0], time: '6:00 PM', concern: 'Wrist pain after a cycling accident. X-ray shows no fracture but pain persists.', shareRecords: false, status: 'Completed', createdAt: new Date(Date.now() - 172800000).toISOString() },
+];
+let secondOpinions = [
+    { id: 1, patientName: 'Aashish Verma', phone: '+91 99887 11223', diagnosis: 'Lumbar disc herniation L4-L5 with nerve compression', treatment: 'Spinal decompression surgery recommended — cost ₹4.5 Lakh at Sterling Hospital', hospital: 'Sterling Hospital, Surat', urgency: 'standard', notes: 'I am 32 years old with no prior surgeries. The pain started 4 months ago. Physiotherapy helped initially but pain returned. Doctor says surgery is the only option now. I want to know if this is really necessary or if I should try more conservative treatment first.', amount: 199, status: 'Under Review', createdAt: new Date(Date.now() - 28800000).toISOString(), estimatedDelivery: '24 hours' },
+    { id: 2, patientName: 'Savitaben Patel', phone: '+91 98765 11111', diagnosis: 'Bilateral knee osteoarthritis Grade 3', treatment: 'Total knee replacement (both knees) — cost ₹8 Lakh at BAPS Hospital', hospital: 'BAPS Hospital, Surat', urgency: 'urgent', notes: 'Age 62, diabetic for 15 years, on insulin. Doctor says both knees need replacement urgently. But I am scared of surgery at my age with diabetes. Current medicines: Metformin 1000mg, Insulin Glargine 20 units. Can physiotherapy or injections help instead?', amount: 499, status: 'Under Review', createdAt: new Date(Date.now() - 43200000).toISOString(), estimatedDelivery: '12 hours' },
+    { id: 3, patientName: 'Rajesh Kumar', phone: '+91 88776 55443', diagnosis: 'Cervical spondylosis with mild cord compression', treatment: 'Anterior cervical discectomy and fusion (ACDF) — cost ₹3.2 Lakh', hospital: 'Kiran Hospital, Surat', urgency: 'standard', notes: 'Neck pain with tingling in both hands for 6 months. MRI done. Doctor recommends surgery but I want to know if there are non-surgical options.', amount: 199, status: 'Resolved', verdict: 'Based on the MRI findings described, the cord compression appears mild. I recommend trying conservative management first: 1) Cervical traction therapy for 3 weeks, 2) Gabapentin 300mg for neuropathic pain, 3) Strict postural correction. Surgery should be considered only if symptoms worsen or myelopathy signs develop. Re-evaluate with repeat MRI in 3 months.', createdAt: new Date(Date.now() - 259200000).toISOString(), resolvedAt: new Date(Date.now() - 172800000).toISOString(), estimatedDelivery: '24 hours' },
+];
+let appointmentIdCounter = 6;
+let soIdCounter = 4;
+
+// Mock patient ABHA records for provider view
+const mockPatientRecords = {
+    'Rameshbhai Patel': { abhaId: '91-4623-8901-7234', bloodGroup: 'B+', allergies: ['Penicillin', 'Sulfa drugs'], conditions: ['Type 2 Diabetes', 'Hypertension'], currentMeds: ['Metformin 500mg', 'Telmisartan 40mg', 'Atorvastatin 10mg'], recentLab: 'HbA1c 7.2% (12 days ago)', age: 58 },
+    'Sureshbhai Modi': { abhaId: '91-5512-3344-9988', bloodGroup: 'A+', allergies: ['Aspirin'], conditions: ['Lumbar spondylosis'], currentMeds: ['Etoricoxib 90mg', 'Pregabalin 75mg'], recentLab: 'ESR 28 mm/hr (1 month ago)', age: 45 },
+    'Meena Sharma': { abhaId: '91-7788-1122-3344', bloodGroup: 'O+', allergies: [], conditions: ['None reported'], currentMeds: ['Calcium + Vit D3'], recentLab: 'Serum Calcium 9.1 (2 months ago)', age: 38 },
+    'Jayeshbhai Patel': { abhaId: '91-2233-4455-6677', bloodGroup: 'B-', allergies: ['Ibuprofen'], conditions: ['Osteoarthritis'], currentMeds: ['Diacerein 50mg', 'Paracetamol SOS'], recentLab: 'CRP 4.2 (3 weeks ago)', age: 65 },
+};
+
+// ── Full Medical History per patient (timeline format for ABHA viewer) ──
+const mockPatientHistory = {
+    'Rameshbhai Patel': {
+        demographics: { name: 'Rameshbhai Patel', age: 58, gender: 'Male', abhaId: '91-4623-8901-7234', bloodGroup: 'B+', phone: '+91 98765 43210', emergencyContact: 'Sureshbhai Patel (Son) — +91 99887 12345' },
+        allergies: [{ name: 'Penicillin', severity: 'Severe', reaction: 'Anaphylaxis — documented in 2018 at Civil Hospital' }, { name: 'Sulfa drugs', severity: 'Moderate', reaction: 'Skin rash and itching' }],
+        conditions: [
+            { name: 'Type 2 Diabetes Mellitus', since: 'Jan 2018', status: 'Active — on medication', treatingDoctor: 'Dr. Anita Rao (Endocrinologist)' },
+            { name: 'Essential Hypertension', since: 'Mar 2019', status: 'Controlled — on medication', treatingDoctor: 'Dr. Amit Patel (General Physician)' },
+            { name: 'Right Knee Osteoarthritis', since: 'Jun 2024', status: 'Post-arthroscopy — monitoring', treatingDoctor: 'Dr. Rajesh Mehta (Orthopedic)' }
+        ],
+        medications: [
+            { name: 'Metformin 500mg', dosage: 'BD (after meals)', since: 'Jan 2018', prescribedBy: 'Dr. Anita Rao' },
+            { name: 'Telmisartan 40mg', dosage: 'OD (morning)', since: 'Mar 2019', prescribedBy: 'Dr. Amit Patel' },
+            { name: 'Atorvastatin 10mg', dosage: 'HS (at bedtime)', since: 'Jun 2020', prescribedBy: 'Dr. Priya Sharma' },
+            { name: 'Calcium + Vitamin D3', dosage: 'OD', since: 'Aug 2025', prescribedBy: 'Dr. Rajesh Mehta' }
+        ],
+        timeline: [
+            {
+                date: '2026-03-28', type: 'Lab Report', icon: '🧪', facility: 'Kiran Lab, Surat', doctor: 'Dr. Anita Rao', title: 'Diabetes Monitoring Panel', details: [
+                    { test: 'HbA1c', value: '7.2%', ref: '<7.0%', flag: '⚠️ Slightly High' },
+                    { test: 'Fasting Blood Sugar', value: '142 mg/dL', ref: '70-110 mg/dL', flag: '⚠️ High' },
+                    { test: 'Post-Prandial Sugar', value: '198 mg/dL', ref: '<140 mg/dL', flag: '⚠️ High' },
+                    { test: 'Serum Creatinine', value: '1.0 mg/dL', ref: '0.7-1.3', flag: '✅ Normal' },
+                    { test: 'Urine Microalbumin', value: '18 mg/L', ref: '<20 mg/L', flag: '✅ Normal' }
+                ]
+            },
+            {
+                date: '2026-02-15', type: 'Prescription', icon: '💊', facility: 'City Clinic, Adajan', doctor: 'Dr. Amit Patel', title: 'Routine Follow-up — Diabetes + Hypertension', details: [
+                    { med: 'Metformin 500mg', instruction: '1-0-1 after meals' },
+                    { med: 'Telmisartan 40mg', instruction: '1-0-0 morning' },
+                    { med: 'Atorvastatin 10mg', instruction: '0-0-1 at bedtime' },
+                    { med: 'Calcium + Vit D3', instruction: '0-1-0 afternoon' }
+                ], notes: 'BP 138/86. Weight 78 kg. Reduce salt intake. Review HbA1c after 3 months. Walk 30 min daily.'
+            },
+            {
+                date: '2026-02-15', type: 'Blood Report', icon: '🩸', facility: 'Kiran Lab, Surat', doctor: 'Dr. Amit Patel', title: 'Complete Blood Count (CBC)', details: [
+                    { test: 'Hemoglobin', value: '13.2 g/dL', ref: '13.0-17.0', flag: '✅ Normal' },
+                    { test: 'WBC', value: '7,200 /μL', ref: '4,000-11,000', flag: '✅ Normal' },
+                    { test: 'Platelets', value: '2.5 Lakh /μL', ref: '1.5-4.0 Lakh', flag: '✅ Normal' },
+                    { test: 'ESR', value: '12 mm/hr', ref: '<20', flag: '✅ Normal' }
+                ]
+            },
+            { date: '2026-01-20', type: 'Imaging', icon: '📷', facility: 'Sterling Hospital, Surat', doctor: 'Dr. Rajesh Mehta', title: 'Chest X-Ray PA View', details: [], notes: 'No active lung pathology. Cardiomegaly absent. Normal cardiac silhouette. Bilateral clear lung fields. No bony abnormality noted. Normal study.' },
+            {
+                date: '2025-12-10', type: 'Lab Report', icon: '🧪', facility: 'SRL Diagnostics, Athwa', doctor: 'Dr. Anita Rao', title: 'HbA1c & Lipid Profile', details: [
+                    { test: 'HbA1c', value: '7.8%', ref: '<7.0%', flag: '⚠️ High' },
+                    { test: 'Total Cholesterol', value: '212 mg/dL', ref: '<200', flag: '⚠️ Borderline' },
+                    { test: 'LDL', value: '138 mg/dL', ref: '<100', flag: '⚠️ High' },
+                    { test: 'HDL', value: '42 mg/dL', ref: '>40', flag: '✅ Normal' },
+                    { test: 'Triglycerides', value: '168 mg/dL', ref: '<150', flag: '⚠️ Borderline' }
+                ]
+            },
+            { date: '2025-08-05', type: 'Discharge Summary', icon: '🏥', facility: 'BAPS Hospital, Surat', doctor: 'Dr. Rajesh Mehta', title: 'Right Knee Arthroscopy', details: [], notes: 'Diagnosis: Medial meniscal tear, right knee. Procedure: Arthroscopic partial meniscectomy under spinal anesthesia. Duration: 45 minutes. Findings: Grade 2 chondromalacia patella, partial tear of medial meniscus posterior horn. Intra-op: Partial meniscectomy + chondral shaving. Post-op: Stable vitals, no complications. Discharged Day 2 with knee brace. Physiotherapy started Day 3. Follow-up in 2 weeks.' },
+            {
+                date: '2025-05-22', type: 'Lab Report', icon: '🧪', facility: 'SRL Diagnostics, Athwa', doctor: 'Dr. Anita Rao', title: 'Annual Diabetes Panel', details: [
+                    { test: 'HbA1c', value: '7.5%', ref: '<7.0%', flag: '⚠️ High' },
+                    { test: 'Fasting Sugar', value: '136 mg/dL', ref: '70-110', flag: '⚠️ High' },
+                    { test: 'Kidney Function (eGFR)', value: '88 mL/min', ref: '>60', flag: '✅ Normal' },
+                    { test: 'Thyroid (TSH)', value: '3.2 mIU/L', ref: '0.4-4.0', flag: '✅ Normal' }
+                ]
+            },
+            { date: '2025-01-10', type: 'Imaging', icon: '📷', facility: 'Sterling Hospital, Surat', doctor: 'Dr. Rajesh Mehta', title: 'MRI Right Knee', details: [], notes: 'MRI findings: Partial tear of posterior horn of medial meniscus. Mild joint effusion. Grade 2 chondromalacia patella. ACL and PCL intact. No loose bodies. Recommendation: Arthroscopic evaluation advised.' },
+            {
+                date: '2024-11-18', type: 'Prescription', icon: '💊', facility: 'Mehta Ortho Clinic, Vesu', doctor: 'Dr. Rajesh Mehta', title: 'Knee Pain — Conservative Management', details: [
+                    { med: 'Etoricoxib 90mg', instruction: '0-0-1 after dinner for 14 days' },
+                    { med: 'Glucosamine + Chondroitin', instruction: '1-0-1 for 90 days' },
+                    { med: 'Diclofenac gel', instruction: 'Apply locally twice daily' }
+                ], notes: 'Grade 2 knee OA. Try conservative management for 3 months before considering arthroscopy. Quadriceps strengthening exercises daily. Avoid squatting and stair climbing.'
+            }
+        ],
+        vitals: [
+            { date: '2026-02-15', bp: '138/86', weight: '78 kg', pulse: '76 bpm', temp: '98.2°F', spo2: '97%' },
+            { date: '2025-12-10', bp: '142/90', weight: '79 kg', pulse: '80 bpm', temp: '98.4°F', spo2: '98%' },
+            { date: '2025-08-05', bp: '130/82', weight: '77 kg', pulse: '72 bpm', temp: '98.0°F', spo2: '99%' }
+        ]
+    },
+    'Sureshbhai Modi': {
+        demographics: { name: 'Sureshbhai Modi', age: 45, gender: 'Male', abhaId: '91-5512-3344-9988', bloodGroup: 'A+', phone: '+91 99887 76543', emergencyContact: 'Komalben Modi (Wife) — +91 99876 54321' },
+        allergies: [{ name: 'Aspirin', severity: 'Mild', reaction: 'Gastric irritation and acidity' }],
+        conditions: [
+            { name: 'Lumbar Spondylosis (L4-L5)', since: 'Feb 2025', status: 'Active — under treatment', treatingDoctor: 'Dr. Rajesh Mehta (Orthopedic)' }
+        ],
+        medications: [
+            { name: 'Etoricoxib 90mg', dosage: 'OD (after dinner)', since: 'Feb 2025', prescribedBy: 'Dr. Rajesh Mehta' },
+            { name: 'Pregabalin 75mg', dosage: 'HS (at night)', since: 'Mar 2025', prescribedBy: 'Dr. Sanjay Joshi' }
+        ],
+        timeline: [
+            { date: '2026-03-15', type: 'Imaging', icon: '📷', facility: 'Sterling Hospital, Surat', doctor: 'Dr. Rajesh Mehta', title: 'MRI Lumbar Spine', details: [], notes: 'Disc bulge at L4-L5 with mild thecal sac compression. Bilateral foraminal narrowing more on the left. No significant disc herniation. Degenerative changes at L3-L4 and L5-S1. Recommendation: Conservative management with physiotherapy.' },
+            {
+                date: '2026-02-20', type: 'Lab Report', icon: '🧪', facility: 'SRL Diagnostics', doctor: 'Dr. Amit Patel', title: 'Inflammatory Markers', details: [
+                    { test: 'ESR', value: '28 mm/hr', ref: '<20', flag: '⚠️ High' },
+                    { test: 'CRP', value: '6.4 mg/L', ref: '<5', flag: '⚠️ Mildly Elevated' },
+                    { test: 'Vitamin D', value: '18 ng/mL', ref: '30-100', flag: '⚠️ Deficient' },
+                    { test: 'Calcium', value: '9.0 mg/dL', ref: '8.5-10.5', flag: '✅ Normal' }
+                ]
+            },
+            {
+                date: '2025-11-10', type: 'Prescription', icon: '💊', facility: 'Mehta Ortho Clinic, Vesu', doctor: 'Dr. Rajesh Mehta', title: 'Lower Back Pain Management', details: [
+                    { med: 'Etoricoxib 90mg', instruction: '0-0-1 after dinner' },
+                    { med: 'Pregabalin 75mg', instruction: '0-0-1 at bedtime' },
+                    { med: 'Vitamin D3 60K', instruction: 'Once weekly for 8 weeks' }
+                ], notes: 'Avoid heavy lifting. Start back-strengthening exercises. Hot fomentation twice daily. Sleep on hard surface.'
+            }
+        ],
+        vitals: [
+            { date: '2026-02-20', bp: '126/80', weight: '82 kg', pulse: '74 bpm', temp: '98.4°F', spo2: '98%' }
+        ]
+    },
+    'Jayeshbhai Patel': {
+        demographics: { name: 'Jayeshbhai Patel', age: 65, gender: 'Male', abhaId: '91-2233-4455-6677', bloodGroup: 'B-', phone: '+91 97654 32100', emergencyContact: 'Nikhilbhai Patel (Son) — +91 98765 00001' },
+        allergies: [{ name: 'Ibuprofen', severity: 'Moderate', reaction: 'Gastric bleeding (episode in 2023)' }],
+        conditions: [
+            { name: 'Bilateral Knee Osteoarthritis Grade 3', since: 'Jan 2023', status: 'Post total knee replacement (left) — rehab', treatingDoctor: 'Dr. Rajesh Mehta' },
+            { name: 'Mild Hypertension', since: 'Jun 2020', status: 'Controlled', treatingDoctor: 'Dr. Amit Patel' }
+        ],
+        medications: [
+            { name: 'Diacerein 50mg', dosage: 'BD', since: 'Jan 2023', prescribedBy: 'Dr. Rajesh Mehta' },
+            { name: 'Paracetamol 650mg', dosage: 'SOS (as needed)', since: 'Jan 2023', prescribedBy: 'Dr. Rajesh Mehta' },
+            { name: 'Amlodipine 5mg', dosage: 'OD morning', since: 'Jun 2020', prescribedBy: 'Dr. Amit Patel' }
+        ],
+        timeline: [
+            { date: '2026-02-25', type: 'Discharge Summary', icon: '🏥', facility: 'BAPS Hospital, Surat', doctor: 'Dr. Rajesh Mehta', title: 'Left Total Knee Replacement', details: [], notes: 'Procedure: Cemented TKR left knee under spinal anesthesia. Implant: Smith & Nephew Genesis II. Duration: 90 min. Blood loss: 250 mL. Post-op: DVT prophylaxis with Enoxaparin 40mg x 5 days. Mobilized with walker on Day 2. Discharged Day 5. Staple removal at 14 days. Physiotherapy protocol initiated.' },
+            {
+                date: '2026-02-24', type: 'Lab Report', icon: '🧪', facility: 'BAPS Hospital', doctor: 'Dr. Rajesh Mehta', title: 'Pre-Operative Panel', details: [
+                    { test: 'Hemoglobin', value: '12.4 g/dL', ref: '13-17', flag: '⚠️ Slightly Low' },
+                    { test: 'Platelets', value: '2.1 Lakh', ref: '1.5-4.0 Lakh', flag: '✅ Normal' },
+                    { test: 'PT/INR', value: '1.0', ref: '0.8-1.2', flag: '✅ Normal' },
+                    { test: 'Blood Sugar (Random)', value: '108 mg/dL', ref: '<140', flag: '✅ Normal' },
+                    { test: 'ECG', value: 'Normal sinus rhythm', ref: 'Normal', flag: '✅ Normal' }
+                ]
+            },
+            { date: '2025-09-12', type: 'Imaging', icon: '📷', facility: 'Sterling Hospital', doctor: 'Dr. Rajesh Mehta', title: 'X-Ray Both Knees AP & Lateral', details: [], notes: 'Left knee: Grade 3 OA with medial compartment narrowing, subchondral sclerosis, and osteophyte formation. Right knee: Grade 2 OA, moderate joint space narrowing. Alignment: 5° varus deformity left knee. Recommendation: TKR left knee.' }
+        ],
+        vitals: [
+            { date: '2026-02-25', bp: '134/84', weight: '74 kg', pulse: '78 bpm', temp: '98.6°F', spo2: '97%' },
+            { date: '2026-02-24', bp: '140/88', weight: '74 kg', pulse: '82 bpm', temp: '98.2°F', spo2: '98%' }
+        ]
+    }
+};
+
+// Prescription state
+let prescriptions = [];
+let rxIdCounter = 1;
 
 // API functions wrapping the data in promises to simulate network delays
 
@@ -874,4 +1036,117 @@ export async function submitSecondOpinion(data) {
     };
     secondOpinions.push(opinion);
     return { success: true, opinion };
+}
+
+/* ══════════════════════════════════════════════════════════
+   PROVIDER / DOCTOR MVP ENDPOINTS
+══════════════════════════════════════════════════════════ */
+
+export async function getProviderDashboardStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const completed = appointments.filter(a => a.status === 'Completed');
+    const thisMonth = appointments.filter(a => { const d = new Date(a.createdAt); const n = new Date(); return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear(); });
+    return {
+        todayAppointments: appointments.filter(a => a.date === today && a.status !== 'Cancelled').length,
+        totalAppointments: appointments.length,
+        pendingOpinions: secondOpinions.filter(o => o.status === 'Under Review').length,
+        resolvedOpinions: secondOpinions.filter(o => o.status === 'Resolved').length,
+        totalOpinions: secondOpinions.length,
+        completedAppointments: completed.length,
+        monthlyRevenue: thisMonth.filter(a => a.status === 'Completed').length * 500,  // ₹500 per consult
+        totalRevenue: completed.length * 500,
+        totalPatients: new Set(appointments.map(a => a.patientName)).size,
+        avgRating: 4.7,
+        totalReviews: 142,
+        prescriptionsIssued: prescriptions.length,
+        monthlyAppointments: thisMonth.length,
+    };
+}
+
+export async function fetchProviderAppointments(filter) {
+    let result = [...appointments];
+    if (filter && filter !== 'all') result = result.filter(a => a.status === filter);
+    return { appointments: result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) };
+}
+
+export async function updateAppointmentStatus(id, status) {
+    const appt = appointments.find(a => a.id === id);
+    if (appt) appt.status = status;
+    return { success: true };
+}
+
+export async function fetchProviderOpinions() {
+    return { opinions: secondOpinions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) };
+}
+
+export async function submitOpinionVerdict(id, verdict) {
+    const op = secondOpinions.find(o => o.id === id);
+    if (op) {
+        op.status = 'Resolved';
+        op.verdict = verdict;
+        op.resolvedAt = new Date().toISOString();
+    }
+    return { success: true };
+}
+
+export async function getPatientABHA(patientName) {
+    return mockPatientRecords[patientName] || null;
+}
+
+export async function getPatientFullHistory(patientName) {
+    return mockPatientHistory[patientName] || null;
+}
+
+export async function createPrescription(data) {
+    const rx = {
+        id: rxIdCounter++,
+        ...data,
+        createdAt: new Date().toISOString()
+    };
+    prescriptions.push(rx);
+    return { success: true, prescription: rx };
+}
+
+export async function fetchPrescriptions() {
+    return { prescriptions: prescriptions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) };
+}
+
+export function getProviderProfile() {
+    return doctors.find(d => d.id === 1); // Dr. Rajesh Mehta is the logged-in provider
+}
+
+export async function updateProviderProfile(updates) {
+    const doc = doctors.find(d => d.id === 1);
+    if (doc) Object.assign(doc, updates);
+    return { success: true, doctor: doc };
+}
+
+export function getMedicineGenericAlternatives(brandName) {
+    const med = medicines.find(m => m.brandName.toLowerCase().includes(brandName.toLowerCase()) || m.generic.toLowerCase().includes(brandName.toLowerCase()));
+    if (med) return { found: true, branded: med.brandName, generic: med.generic, brandPrice: med.brandPrice, genericPrice: med.genericPrice, janAushadhiPrice: med.janAushadhiPrice, monthlySavings: med.monthlySavings };
+    return { found: false };
+}
+
+/* ══════════════════════════════════════════════════════════
+   PHASE 1: AUTH & ABHA API MOCKS
+══════════════════════════════════════════════════════════ */
+export async function sendOTP(phone) {
+    return new Promise(r => setTimeout(() => r({ success: true, message: 'OTP sent to ' + phone }), 800));
+}
+
+export async function verifyOTP(phone, otp) {
+    return new Promise(r => setTimeout(() => r({ success: true, token: 'mock-jwt-token' }), 800));
+}
+
+export async function registerPatient(data) {
+    return new Promise(r => setTimeout(() => r({ success: true, user: { ...data, abhaLinked: false } }), 800));
+}
+
+export async function generateABHA(phone, aadharOtp) {
+    const abha = `91-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    return new Promise(r => setTimeout(() => r({ success: true, abhaId: abha }), 1500));
+}
+
+export async function linkABHA(abhaNumber) {
+    return new Promise(r => setTimeout(() => r({ success: true, linked: true }), 1200));
 }

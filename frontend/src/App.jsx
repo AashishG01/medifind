@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { t } from './i18n';
 import * as api from './api';
+import DoctorApp from './DoctorPages';
+import AdminPanel from './AdminPanel';
 
 /* Specialty config */
 const SPECS = [
@@ -25,6 +27,9 @@ const specMap = {};
 SPECS.forEach(([key, emoji, , color, bg]) => { specMap[key] = { emoji, color, bg }; });
 
 export default function App() {
+  const [isDoctor, setIsDoctor] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [page, setPage] = useState('home');
   const [lang, setLang] = useState('en');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,6 +56,14 @@ export default function App() {
     ['opinion', T('nav_opinion', 'Second Opinion')],
   ];
 
+  if (isAdmin) {
+    return <AdminPanel goPatient={() => setIsAdmin(false)} />;
+  }
+
+  if (isDoctor) {
+    return <DoctorApp goPatient={() => setIsDoctor(false)} />;
+  }
+
   return (
     <>
       {/* ════════ NAVBAR ════════ */}
@@ -71,6 +84,15 @@ export default function App() {
             <button className="lang-btn" onClick={() => setLang(lang === 'en' ? 'gu' : 'en')}>
               {lang === 'en' ? 'ગુજરાતી' : 'English'}
             </button>
+            {currentUser ? (
+              <button className="btn btn-primary" onClick={() => go('bookings')} style={{ padding: '8px 16px', fontSize: 13 }}>
+                👤 {currentUser.name.split(' ')[0]}
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => go('login')} style={{ padding: '8px 16px', fontSize: 13 }}>
+                {T('nav_login', 'Login / Sign Up')}
+              </button>
+            )}
             <button className="mobile-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
           </div>
         </div>
@@ -78,14 +100,16 @@ export default function App() {
 
       {/* ════════ PAGE CONTENT ════════ */}
       {page === 'home' && <LandingPage lang={lang} T={T} go={go} />}
+      {page === 'login' && <LoginPage T={T} go={go} showToast={showToast} setUser={setCurrentUser} />}
+      {page === 'abha-onboarding' && <ABHAOnboardingPage T={T} go={go} showToast={showToast} user={currentUser} setUser={setCurrentUser} />}
       {page === 'symptoms' && <SymptomsPage lang={lang} T={T} go={go} />}
       {page === 'doctors' && <DoctorsPage lang={lang} T={T} go={go} initSpec={pageData?.specialty} />}
       {page === 'doctor-profile' && <DoctorProfilePage d={pageData} lang={lang} T={T} go={go} showToast={showToast} />}
-      {page === 'booking' && <BookingPage doctor={pageData} lang={lang} T={T} go={go} showToast={showToast} />}
+      {page === 'booking' && <BookingPage doctor={pageData} lang={lang} T={T} go={go} showToast={showToast} user={currentUser} />}
       {page === 'medicines' && <MedicinesPage lang={lang} T={T} />}
-      {page === 'records' && <RecordsPage lang={lang} T={T} />}
-      {page === 'opinion' && <SecondOpinionPage lang={lang} T={T} showToast={showToast} />}
-      {page === 'bookings' && <BookingsPage lang={lang} T={T} go={go} />}
+      {page === 'records' && <RecordsPage lang={lang} T={T} user={currentUser} go={go} />}
+      {page === 'opinion' && <SecondOpinionPage lang={lang} T={T} showToast={showToast} user={currentUser} go={go} />}
+      {page === 'bookings' && <BookingsPage lang={lang} T={T} go={go} user={currentUser} showToast={showToast} />}
 
       {/* ════════ FOOTER ════════ */}
       <footer className="footer">
@@ -121,6 +145,8 @@ export default function App() {
                 <li className="footer-link">Privacy Policy</li>
                 <li className="footer-link">Terms of Service</li>
                 <li className="footer-link">DPDP Act 2023</li>
+                <li className="footer-link" style={{ color: 'var(--accent)', marginTop: 8 }} onClick={() => setIsDoctor(true)}>Provider Login →</li>
+                <li className="footer-link" style={{ color: '#f59e0b', marginTop: 4 }} onClick={() => setIsAdmin(true)}>Admin Panel →</li>
               </ul>
             </div>
           </div>
@@ -402,18 +428,18 @@ function DoctorsPage({ lang, T, go, initSpec }) {
 
         <div className="filter-bar">
           <select className="filter-select" value={filters.specialty} onChange={e => setFilters({ ...filters, specialty: e.target.value })}>
-            <option value="all">All Specialties</option>
-            {specialties.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="all">{T('flt_spec', 'All Specialties')}</option>
+            {specialties.map(s => <option key={s} value={s}>{isGu && specMap[s]?.gu ? specMap[s].gu : s}</option>)}
           </select>
           <select className="filter-select" value={filters.locality} onChange={e => setFilters({ ...filters, locality: e.target.value })}>
-            <option value="all">All Localities</option>
+            <option value="all">{T('flt_loc', 'All Localities')}</option>
             {localities.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
           <select className="filter-select" value={filters.sort} onChange={e => setFilters({ ...filters, sort: e.target.value })}>
-            <option value="merit">Sort: Merit Score</option>
-            <option value="fee-low">Sort: Fee (Low → High)</option>
-            <option value="fee-high">Sort: Fee (High → Low)</option>
-            <option value="experience">Sort: Experience</option>
+            <option value="merit">{T('srt_merit', 'Sort: Merit Score')}</option>
+            <option value="fee-low">{T('srt_low', 'Sort: Fee (Low → High)')}</option>
+            <option value="fee-high">{T('srt_high', 'Sort: Fee (High → Low)')}</option>
+            <option value="experience">{T('srt_exp', 'Sort: Experience')}</option>
           </select>
           <input className="filter-search" value={filters.search} onChange={e => setFilters({ ...filters, search: e.target.value })}
             placeholder={T('doc_search', 'Search doctors by name...')} />
@@ -424,6 +450,7 @@ function DoctorsPage({ lang, T, go, initSpec }) {
         <div className="doctors-grid">
           {doctors.map(d => {
             const spec = specMap[d.specialty] || {};
+            const meritScore = d.rating ? (d.rating * 0.4 + (d.verified ? 1 : 0) * 5 * 0.2 + Math.min(d.experience / 20, 1) * 5 * 0.2 + 4.5 * 0.2).toFixed(1) : '4.5';
             return (
               <div key={d.id} className="doctor-card" onClick={() => go('doctor-profile', d)}>
                 <div className="doctor-top">
@@ -433,18 +460,25 @@ function DoctorsPage({ lang, T, go, initSpec }) {
                     <span className="spec-chip" style={{ background: spec.bg, color: spec.color }}>
                       {isGu ? d.specialtyGu : d.specialty}
                     </span>
-                    <div className="verified-tag">🟢 Verified</div>
+                    {d.verified && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#ecfdf5', color: '#059669', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, marginTop: 4 }}>✅ NMC Verified · {d.nmcId}</div>}
                   </div>
                 </div>
                 <div className="doctor-meta">
                   <span>📍 {d.address?.split(',').slice(-2).join(',').trim()}</span>
-                  <span>⏱ {d.experience} years · 🗣 {d.languages.join(', ')}</span>
+                  <span>⏱ {d.experience} {T('doc_yrs', 'years')} · 🗣 {d.languages.join(', ')}</span>
                   <span>🕐 {d.timings}</span>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)', marginTop: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ background: 'linear-gradient(135deg,#1C52A0,#2563eb)', color: 'white', padding: '2px 8px', borderRadius: 6, fontWeight: 800, fontSize: 14 }}>{meritScore}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Merit Score</span>
+                  </div>
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>⭐ {d.rating} ({d.reviewCount} reviews)</span>
+                </div>
                 <div className="doctor-bottom">
-                  <div className="doctor-fee">₹{d.fee} <span>consultation</span></div>
+                  <div className="doctor-fee">₹{d.fee} <span>{T('doc_cons', 'consultation')}</span></div>
                   <button className="btn btn-primary btn-sm" onClick={e => { e.stopPropagation(); go('booking', d); }}>
-                    Book →
+                    {T('doc_book_btn', 'Book →')}
                   </button>
                 </div>
               </div>
@@ -462,6 +496,12 @@ function DoctorsPage({ lang, T, go, initSpec }) {
 function DoctorProfilePage({ d, lang, T, go, showToast }) {
   const isGu = lang === 'gu';
   const spec = specMap[d.specialty] || {};
+  const meritScore = d.rating ? (d.rating * 0.4 + (d.verified ? 1 : 0) * 5 * 0.2 + Math.min(d.experience / 20, 1) * 5 * 0.2 + 4.5 * 0.2).toFixed(1) : '4.5';
+  const mockReviews = [
+    { name: 'Suresh P.', date: 'Mar 2026', overall: 5, waitTime: 4, clarity: 5, staff: 5, value: 5, text: 'Very thorough explanation. Doctor spent quality time understanding my condition.' },
+    { name: 'Meena B.', date: 'Feb 2026', overall: 4, waitTime: 3, clarity: 5, staff: 4, value: 4, text: 'Good doctor. Wait time was a bit long but consultation was excellent.' },
+    { name: 'Ketan D.', date: 'Jan 2026', overall: 5, waitTime: 5, clarity: 5, staff: 5, value: 5, text: 'Best in Surat for this specialty. Highly recommend!' },
+  ];
   return (
     <>
       <section className="profile-hero">
@@ -471,12 +511,12 @@ function DoctorProfilePage({ d, lang, T, go, showToast }) {
             <div>
               <div className="profile-name-lg">{isGu ? d.nameGu : d.name}</div>
               <div className="profile-spec">{isGu ? d.specialtyGu : d.specialty} · {d.qualification}</div>
-              <div className="profile-verified">🟢 Verified by MediFind · NMC: {d.nmcId}</div>
+              {d.verified && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(5,150,105,0.15)', color: '#059669', padding: '4px 12px', borderRadius: 8, fontSize: 13, fontWeight: 700, marginTop: 6 }}>✅ NMC Verified · {d.nmcId}</div>}
               <div className="profile-chips">
-                <span className="profile-chip">₹{d.fee} Fee</span>
-                <span className="profile-chip">⏱ {d.experience} years</span>
+                <span className="profile-chip">₹{d.fee} {T('prof_fee', 'Fee')}</span>
+                <span className="profile-chip">⏱ {d.experience} {T('prof_yrs', 'years')}</span>
                 <span className="profile-chip">🗣 {d.languages.join(', ')}</span>
-                <span className="profile-chip">⭐ {d.rating} ({d.reviewCount} reviews)</span>
+                <span className="profile-chip" style={{ background: 'linear-gradient(135deg,#1C52A0,#2563eb)', color: 'white', fontWeight: 800 }}>🏆 {meritScore} Merit</span>
               </div>
             </div>
           </div>
@@ -487,28 +527,62 @@ function DoctorProfilePage({ d, lang, T, go, showToast }) {
           <div className="profile-grid">
             <div>
               <div className="profile-section">
-                <div className="profile-section-title">About</div>
+                <div className="profile-section-title">{T('pr_abt', 'About')}</div>
                 <p className="profile-text">{isGu ? d.aboutGu : d.about}</p>
               </div>
               <div className="profile-section">
-                <div className="profile-section-title">Clinic Address</div>
+                <div className="profile-section-title">{T('pr_adr', 'Clinic Address')}</div>
                 <p className="profile-text">{d.address}</p>
               </div>
               <div className="profile-section">
-                <div className="profile-section-title">Timings</div>
+                <div className="profile-section-title">{T('pr_time', 'Timings')}</div>
                 <p className="profile-text">{d.timings}</p>
-                <p className="profile-text" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Sunday — Closed</p>
+                <p className="profile-text" style={{ color: 'var(--text-muted)', fontSize: 13 }}>{T('pr_sun', 'Sunday — Closed')}</p>
+              </div>
+              {/* Merit Score Breakdown */}
+              <div className="profile-section">
+                <div className="profile-section-title">🏆 Merit Score Breakdown</div>
+                <div style={{ background: '#f8fafc', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[['Patient Reviews (40%)', d.rating, '#f59e0b'], ['NMC Verification (20%)', d.verified ? 5 : 0, '#059669'], ['Profile Completeness (20%)', 4.5, '#3b82f6'], ['Response Rate (20%)', 4.5, '#8b5cf6']].map(([label, val, color]) => (
+                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ flex: 1, fontSize: 13 }}>{label}</div>
+                      <div style={{ width: 120, height: 6, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}><div style={{ width: `${(val / 5) * 100}%`, height: '100%', background: color, borderRadius: 3 }} /></div>
+                      <div style={{ fontSize: 13, fontWeight: 700, width: 30, textAlign: 'right' }}>{val}/5</div>
+                    </div>
+                  ))}
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4, fontSize: 12, color: 'var(--text-muted)' }}>⚖️ No paid promotions. Rankings are 100% merit-based.</div>
+                </div>
+              </div>
+              {/* Verified Reviews */}
+              <div className="profile-section">
+                <div className="profile-section-title">⭐ Verified Patient Reviews ({d.reviewCount})</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {mockReviews.map((rv, i) => (
+                    <div key={i} style={{ background: '#f8fafc', borderRadius: 12, padding: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 700 }}>{rv.name} <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>· Verified Patient</span></div>
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{rv.date}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+                        {[['Overall', rv.overall], ['Wait Time', rv.waitTime], ['Clarity', rv.clarity], ['Staff', rv.staff], ['Value', rv.value]].map(([l, v]) => (
+                          <span key={l} style={{ fontSize: 11, background: v >= 4 ? '#ecfdf5' : '#fef3c7', color: v >= 4 ? '#059669' : '#b45309', padding: '2px 6px', borderRadius: 4 }}>{l}: {'⭐'.repeat(v)}</span>
+                        ))}
+                      </div>
+                      <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 0 }}>"{rv.text}"</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <div>
               <div className="profile-sidebar-card">
                 <div className="sidebar-fee">₹{d.fee}</div>
-                <div className="sidebar-label">Consultation Fee</div>
+                <div className="sidebar-label">{T('pr_cfee', 'Consultation Fee')}</div>
                 <button className="btn btn-primary btn-full" onClick={() => go('booking', d)}>
                   {T('book', 'Book Appointment')} →
                 </button>
                 <button className="btn btn-outline btn-full" onClick={() => go('doctors')} style={{ marginTop: 8 }}>
-                  ← Back to Doctors
+                  {T('pr_back', '← Back to Doctors')}
                 </button>
               </div>
             </div>
@@ -576,12 +650,12 @@ function BookingPage({ doctor, lang, T, go, showToast }) {
             {/* Step 0: Date */}
             {step === 0 && (
               <>
-                <div className="booking-step">Step 1 of 3</div>
+                <div className="booking-step">{T('bk_s1', 'Step 1 of 3')}</div>
                 <div className="booking-title">{T('sel_date', 'Select a Date')}</div>
-                <div className="booking-desc">Choose when you'd like to visit.</div>
+                <div className="booking-desc">{T('bk_d1', 'Choose when you\'d like to visit.')}</div>
                 <div style={{ marginBottom: 24 }}>
                   <div className="date-grid">
-                    {dayNames.map(d => <div key={d} className="date-header">{d}</div>)}
+                    {dayNames.map(d => <div key={d} className="date-header">{T(`day_${d}`, d)}</div>)}
                     {dates.map((dt, i) => {
                       const val = dt.toISOString().split('T')[0];
                       return (
@@ -595,14 +669,14 @@ function BookingPage({ doctor, lang, T, go, showToast }) {
                 </div>
                 {date && (
                   <>
-                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Select a Time</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>{T('bk_time', 'Select a Time')}</div>
                     <div className="time-slots">
                       {times.map(t => <button key={t} className={`time-slot ${time === t ? 'selected' : ''}`} onClick={() => setTime(t)}>{t}</button>)}
                     </div>
                   </>
                 )}
                 <button className="btn btn-primary" disabled={!date || !time} onClick={() => setStep(1)} style={{ marginTop: 24 }}>
-                  Continue →
+                  {T('ctn', 'Continue →')}
                 </button>
               </>
             )}
@@ -610,16 +684,16 @@ function BookingPage({ doctor, lang, T, go, showToast }) {
             {/* Step 1: Concern */}
             {step === 1 && (
               <>
-                <div className="booking-step">Step 2 of 3</div>
+                <div className="booking-step">{T('bk_s2', 'Step 2 of 3')}</div>
                 <div className="booking-title">{T('concern_t', 'What brings you in?')}</div>
                 <div className="booking-desc">{T('concern_d', 'Briefly describe your concern. The doctor will see this before your visit.')}</div>
                 <textarea className="input-xl" value={concern} onChange={e => setConcern(e.target.value)}
-                  placeholder="e.g. Neck pain for 3 weeks with tingling in my right hand fingers..."
+                  placeholder={T('bk_ph', 'e.g. Neck pain for 3 weeks with tingling in my right hand fingers...')}
                   style={{ width: '100%', marginBottom: 8 }} />
                 <div style={{ textAlign: 'right', fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>{concern.length} / 200</div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button className="btn btn-outline" onClick={() => setStep(0)} style={{ flex: 1 }}>← Back</button>
-                  <button className="btn btn-primary" disabled={!concern.trim()} onClick={() => setStep(2)} style={{ flex: 2 }}>Continue →</button>
+                  <button className="btn btn-outline" onClick={() => setStep(0)} style={{ flex: 1 }}>{T('back', '← Back')}</button>
+                  <button className="btn btn-primary" disabled={!concern.trim()} onClick={() => setStep(2)} style={{ flex: 2 }}>{T('ctn', 'Continue →')}</button>
                 </div>
               </>
             )}
@@ -627,25 +701,25 @@ function BookingPage({ doctor, lang, T, go, showToast }) {
             {/* Step 2: Share ABHA */}
             {step === 2 && (
               <>
-                <div className="booking-step">Step 3 of 3</div>
+                <div className="booking-step">{T('bk_s3', 'Step 3 of 3')}</div>
                 <div className="booking-title">{T('share_t', 'Share your health history?')}</div>
                 <div className="share-card" style={{ boxShadow: 'none', padding: 0, marginBottom: 20 }}>
-                  <div className="share-header"><div className="share-dot" /><span style={{ fontWeight: 600 }}>Your ABHA records are linked</span></div>
+                  <div className="share-header"><div className="share-dot" /><span style={{ fontWeight: 600 }}>{T('bk_linked', 'Your ABHA records are linked')}</span></div>
                   <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '8px 0 16px' }}>
-                    Let {isGu ? d.nameGu : d.name} see your history before your appointment so they can prepare properly.
+                    {T('bk_let', 'Let do')} {isGu ? d.nameGu : d.name} {T('bk_see', 'see your history before your appointment so they can prepare properly.')}
                   </p>
                   <div style={{ marginBottom: 16 }}>
-                    <div className="share-check">Your allergies</div>
-                    <div className="share-check">Current medications</div>
-                    <div className="share-check">Recent lab reports (last 90 days)</div>
+                    <div className="share-check">{T('bk_alg', 'Your allergies')}</div>
+                    <div className="share-check">{T('bk_med', 'Current medications')}</div>
+                    <div className="share-check">{T('bk_lab', 'Recent lab reports (last 90 days)')}</div>
                   </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Access expires after your visit. You can revoke anytime.</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{T('bk_exp', 'Access expires after your visit. You can revoke anytime.')}</p>
                 </div>
                 <button className="btn btn-primary" onClick={() => { setShare(true); submit(); }} style={{ marginBottom: 8 }}>
-                  Yes, share my health history
+                  {T('bk_yes', 'Yes, share my health history')}
                 </button>
                 <button className="btn btn-ghost" onClick={() => { setShare(false); submit(); }}>
-                  No thanks, skip this →
+                  {T('bk_no', 'No thanks, skip this →')}
                 </button>
               </>
             )}
@@ -706,31 +780,59 @@ function MedicinesPage({ lang, T }) {
                 <div className="med-category">{isGu ? m.categoryGu : m.category} · {m.unit}</div>
                 <div className="price-stack">
                   <div className="price-row branded">
-                    <div><div className="price-label">Branded</div><div className="price-sub">₹{m.monthlyBrand}/month</div></div>
+                    <div><div className="price-label">{T('md_brd', 'Branded')}</div><div className="price-sub">₹{m.monthlyBrand}{T('md_mo', '/month')}</div></div>
                     <div className="price-value">₹{m.brandPrice}</div>
                   </div>
                   <div className="price-row generic">
-                    <div><div className="price-label">🟢 Generic</div><div className="price-sub">₹{m.monthlyGeneric}/month</div></div>
+                    <div><div className="price-label">{T('md_gnr', '🟢 Generic')}</div><div className="price-sub">₹{m.monthlyGeneric}{T('md_mo', '/month')}</div></div>
                     <div className="price-value" style={{ color: 'var(--accent-dark)' }}>₹{m.genericPrice}</div>
                   </div>
                   <div className="price-row jan">
-                    <div><div className="price-label">🏪 Jan Aushadhi</div><div className="price-sub">₹{m.monthlyJanAushadhi}/month</div></div>
+                    <div><div className="price-label">{T('md_jan', '🏪 Jan Aushadhi')}</div><div className="price-sub">₹{m.monthlyJanAushadhi}{T('md_mo', '/month')}</div></div>
                     <div><div className="price-value" style={{ color: 'var(--success)' }}>₹{m.janAushadhiPrice}</div>
-                      <div className="price-save">Save ₹{m.monthlySavings}/mo</div>
+                      <div className="price-save">{T('md_save', 'Save')} ₹{m.monthlySavings}{T('md_mo', '/mo')}</div>
                     </div>
                   </div>
                 </div>
                 <div className="yearly-box">
                   <div className="yearly-amount">₹{yearly.toLocaleString()}</div>
-                  <div className="yearly-label">💰 Your yearly saving if you switch</div>
+                  <div className="yearly-label">💰 {T('md_yrsv', 'Your yearly saving if you switch')}</div>
                 </div>
                 <div className="med-disclaimer">
                   <span>⚠️</span>
-                  <span>Always consult your doctor before switching to a generic medicine.</span>
+                  <span>{T('md_warn', 'Always consult your doctor before switching to a generic medicine.')}</span>
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* ═══ PHASE 5: Jan Aushadhi Store Locator ═══ */}
+        <div style={{ marginTop: 40 }}>
+          <div className="section-header" style={{ marginBottom: 24 }}>
+            <div className="section-label">🏪 Near You</div>
+            <h2 className="section-title">{T('jan_title', 'Jan Aushadhi Stores in Surat')}</h2>
+            <p className="section-subtitle">{T('jan_sub', 'Government-subsidized pharmacies with medicines at up to 90% off MRP.')}</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 16 }}>
+            {[
+              { name: 'Jan Aushadhi Kendra - Adajan', address: 'Shop 3, Shreeji Complex, Adajan Gam Rd, Surat', phone: '0261-2789456', distance: '1.2 km', hours: '8 AM - 9 PM' },
+              { name: 'PMBJP Store - Ring Road', address: 'Near Jolly Residency, Ring Road, Surat', phone: '0261-2345678', distance: '2.8 km', hours: '9 AM - 10 PM' },
+              { name: 'Jan Aushadhi - Varachha', address: 'Shop 7, Patel Chambers, Varachha Main Rd', phone: '0261-2891234', distance: '3.5 km', hours: '8 AM - 8 PM' },
+              { name: 'PMBJP - Athwa', address: 'GF-4, Shivam Tower, Athwa Gate, Surat', phone: '0261-2456789', distance: '4.1 km', hours: '9 AM - 9 PM' },
+              { name: 'Jan Aushadhi - Katargam', address: '102, Mahavir Complex, Katargam, Surat', phone: '0261-2567890', distance: '5.2 km', hours: '8 AM - 8 PM' },
+            ].map((s, i) => (
+              <div key={i} style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{s.name}</div>
+                  <span style={{ background: '#ecfdf5', color: '#059669', padding: '2px 8px', borderRadius: 6, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>{s.distance}</span>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>📍 {s.address}</div>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>📞 {s.phone} · 🕐 {s.hours}</div>
+                <button className="btn btn-outline btn-sm" style={{ marginTop: 4, alignSelf: 'flex-start' }}>Get Directions →</button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -742,56 +844,132 @@ function MedicinesPage({ lang, T }) {
 ══════════════════════════════════════════════════════════ */
 function RecordsPage({ lang, T }) {
   const [data, setData] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [algInput, setAlgInput] = useState('');
+  const [condInput, setCondInput] = useState('');
+  const [medInput, setMedInput] = useState('');
+
   const isGu = lang === 'gu';
-  useEffect(() => { api.fetchHealthRecords().then(setData); }, []);
+  useEffect(() => {
+    api.fetchHealthRecords().then(res => {
+      setData(res);
+      setAlgInput(res.allergies.join(', '));
+      setCondInput(res.conditions.join(', '));
+      setMedInput(res.currentMeds.join(', '));
+    });
+  }, []);
 
   if (!data) return <div className="page"><div className="container"><p>Loading...</p></div></div>;
 
   const icons = { 'Blood Report': '🧪', 'Prescription': '📄', 'X-Ray': '🩻', 'Lab Report': '🧪', 'Discharge Summary': '🏥' };
-  const groups = {};
-  data.records.forEach(r => {
-    const cat = r.type === 'Blood Report' || r.type === 'Lab Report' ? 'Lab Reports' : r.type === 'X-Ray' ? 'Imaging' : r.type + 's';
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(r);
-  });
+
+  const handleSaveProfile = () => {
+    setData({
+      ...data,
+      allergies: algInput.split(',').map(s => s.trim()).filter(Boolean),
+      conditions: condInput.split(',').map(s => s.trim()).filter(Boolean),
+      currentMeds: medInput.split(',').map(s => s.trim()).filter(Boolean),
+    });
+    setEditMode(false);
+  };
+
+  const handleUpload = () => {
+    setUploading(true);
+    setTimeout(() => {
+      const newRec = {
+        id: Date.now(),
+        type: 'Blood Report', typeGu: 'લોહીનો રિપોર્ટ',
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        doctor: 'Dr. Self Uploaded',
+        facility: 'Manual Upload (PDF)'
+      };
+      setData({ ...data, records: [newRec, ...data.records] });
+      setUploading(false);
+    }, 1000);
+  };
 
   return (
     <div className="page">
       <div className="container">
-        <div className="page-head">
-          <h1>{T('rec_title', '📋 ABHA Health Records')}</h1>
-          <p>{T('rec_sub', 'Your complete medical history linked with ABHA Health ID.')}</p>
+        <div className="page-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1>{T('rec_title', '📋 ABHA Health Records')}</h1>
+            <p>{T('rec_sub', 'Your complete medical history linked with ABHA Health ID.')}</p>
+          </div>
+          <button className="btn btn-primary" onClick={handleUpload} disabled={uploading}>
+            {uploading ? 'Uploading...' : '📤 Upload Document'}
+          </button>
         </div>
 
         <div className="abha-hero">
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 800 }}>{isGu ? data.patientNameGu : data.patientName}</div>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 4 }}>🟢 ABHA Health ID Linked</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 800 }}>{isGu ? data.patientNameGu : data.patientName}</div>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, marginTop: 4 }}>{T('rc_lkd', '🟢 ABHA Health ID Linked')}</p>
+            </div>
+            {!editMode && <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }} onClick={() => setEditMode(true)}>✏️ Edit Profile</button>}
           </div>
-          <span className="abha-badge">ABHA: {data.abhaId}</span>
-          <div className="abha-grid" style={{ width: '100%' }}>
-            <div className="abha-item"><div className="abha-item-label">Blood Group</div><div className="abha-item-value">🩸 {data.bloodGroup}</div></div>
-            <div className="abha-item"><div className="abha-item-label">Allergies</div><div className="abha-item-value">⚠️ {(isGu ? data.allergiesGu : data.allergies).join(', ')}</div></div>
-            <div className="abha-item"><div className="abha-item-label">Conditions</div><div className="abha-item-value">💊 {(isGu ? data.conditionsGu : data.conditions).join(', ')}</div></div>
-            <div className="abha-item"><div className="abha-item-label">Current Meds</div><div className="abha-item-value">💉 {data.currentMeds.join(', ')}</div></div>
+          <span className="abha-badge" style={{ marginBottom: 20, display: 'inline-block' }}>ABHA: {data.abhaId}</span>
+
+          {editMode ? (
+            <div className="abha-grid" style={{ width: '100%', background: 'white', color: 'black', padding: 16, borderRadius: 12 }}>
+              <div className="form-group">
+                <label className="form-label" style={{ color: '#64748b' }}>Allergies (comma separated)</label>
+                <input className="form-input" value={algInput} onChange={e => setAlgInput(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ color: '#64748b' }}>Chronic Conditions</label>
+                <input className="form-input" value={condInput} onChange={e => setCondInput(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ color: '#64748b' }}>Current Medications</label>
+                <input className="form-input" value={medInput} onChange={e => setMedInput(e.target.value)} />
+              </div>
+              <button className="btn btn-primary" onClick={handleSaveProfile}>Save Health Profile</button>
+            </div>
+          ) : (
+            <div className="abha-grid" style={{ width: '100%' }}>
+              <div className="abha-item"><div className="abha-item-label">{T('rc_bdg', 'Blood Group')}</div><div className="abha-item-value">🩸 {data.bloodGroup}</div></div>
+              <div className="abha-item"><div className="abha-item-label">{T('rc_alg', 'Allergies')}</div><div className="abha-item-value">⚠️ {data.allergies.length ? (isGu ? data.allergiesGu || data.allergies : data.allergies).join(', ') : 'None'}</div></div>
+              <div className="abha-item"><div className="abha-item-label">{T('rc_cnd', 'Conditions')}</div><div className="abha-item-value">💊 {data.conditions.length ? (isGu ? data.conditionsGu || data.conditions : data.conditions).join(', ') : 'None'}</div></div>
+              <div className="abha-item"><div className="abha-item-label">{T('rc_med', 'Current Meds')}</div><div className="abha-item-value">💉 {data.currentMeds.length ? data.currentMeds.join(', ') : 'None'}</div></div>
+            </div>
+          )}
+        </div>
+
+        {/* ═══ PHASE 3: Emergency QR Code ═══ */}
+        <div style={{ marginTop: 32, marginBottom: 32 }}>
+          <div className="card" style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)', color: 'white', padding: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 20 }}>🆘 Emergency Medical QR</h3>
+              <p style={{ margin: '8px 0 0', opacity: 0.85, fontSize: 14 }}>Scannable by any phone camera — shows critical info without login.</p>
+            </div>
+            <button className="btn" style={{ background: 'white', color: '#dc2626', fontWeight: 700, border: 'none' }} onClick={() => {
+              const qrData = `MEDIFIND EMERGENCY\nName: ${data.patientName}\nBlood: ${data.bloodGroup}\nAllergies: ${data.allergies.join(', ')}\nConditions: ${data.conditions.join(', ')}\nMeds: ${data.currentMeds.join(', ')}\nABHA: ${data.abhaId}\nCall: 112`;
+              const w = window.open('', '_blank', 'width=400,height=500');
+              w.document.write(`<html><head><title>Emergency QR</title><style>body{font-family:sans-serif;text-align:center;padding:20px}h2{color:#dc2626}.info{text-align:left;background:#fef2f2;padding:16px;border-radius:12px;margin:16px 0;font-size:14px;line-height:1.8}</style></head><body><h2>🆘 MediFind Emergency Card</h2><div style="background:#f1f5f9;padding:24px;border-radius:12px;margin:16px 0"><svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="white" rx="8"/><text x="100" y="90" text-anchor="middle" font-size="40">📱</text><text x="100" y="120" text-anchor="middle" font-size="10" fill="#666">QR Code</text><text x="100" y="140" text-anchor="middle" font-size="8" fill="#999">(Production: real QR)</text></svg></div><div class="info"><strong>Name:</strong> ${data.patientName}<br/><strong>Blood Group:</strong> 🩸 ${data.bloodGroup}<br/><strong>Allergies:</strong> ⚠️ ${data.allergies.join(', ')}<br/><strong>Conditions:</strong> 💊 ${data.conditions.join(', ')}<br/><strong>Meds:</strong> 💉 ${data.currentMeds.join(', ')}<br/><strong>ABHA:</strong> ${data.abhaId}<br/><strong>Emergency:</strong> 📞 112</div><p style="color:#666;font-size:12px">Generated by MediFind · ${new Date().toLocaleDateString()}</p></body></html>`);
+            }}>Generate Emergency QR →</button>
           </div>
         </div>
 
-        {Object.entries(groups).map(([cat, items]) => (
-          <div key={cat}>
-            <div className="records-group-title">{cat}</div>
-            {items.map(r => (
-              <div key={r.id} className="record-card">
-                <span className="rec-icon">{icons[r.type] || '📄'}</span>
+        <div className="timeline" style={{ marginTop: 0 }}>
+          <h3 style={{ marginBottom: 20 }}>Chronological History</h3>
+          <div style={{ borderLeft: '2px solid var(--border)', marginLeft: 20, paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {data.records.map(r => (
+              <div key={r.id} className="record-card" style={{ position: 'relative', margin: 0 }}>
+                <div style={{ position: 'absolute', left: -43, top: 16, width: 36, height: 36, background: 'white', border: '2px solid var(--border)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, zIndex: 2 }}>
+                  {icons[r.type] || '📄'}
+                </div>
                 <div className="rec-body">
                   <div className="rec-title">{isGu ? r.typeGu : r.type} — {r.doctor}</div>
                   <div className="rec-meta">{r.facility} · {r.date}</div>
                 </div>
-                <span className="rec-arrow">View →</span>
+                <span className="rec-arrow">{T('rc_view', 'View →')}</span>
               </div>
             ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
@@ -844,27 +1022,27 @@ function SecondOpinionPage({ lang, T, showToast }) {
         <div className="so-options">
           <div className={`so-option ${urgency === 'standard' ? 'active' : ''}`} onClick={() => setUrgency('standard')}>
             <div className="so-price">₹199</div>
-            <div className="so-label">Standard</div>
-            <div className="so-time">Report in 24 hours</div>
+            <div className="so-label">{T('so_std', 'Standard')}</div>
+            <div className="so-time">{T('so_t24', 'Report in 24 hours')}</div>
           </div>
           <div className={`so-option ${urgency === 'urgent' ? 'active' : ''}`} onClick={() => setUrgency('urgent')}>
             <div className="so-price">₹499</div>
-            <div className="so-label">Urgent</div>
-            <div className="so-time">Report in 12 hours</div>
+            <div className="so-label">{T('so_urg', 'Urgent')}</div>
+            <div className="so-time">{T('so_t12', 'Report in 12 hours')}</div>
           </div>
         </div>
 
         <div className="form-card">
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
-              <div className="form-group"><label className="form-label">Your Name</label><input className="form-input" name="pName" required placeholder="Full name" /></div>
-              <div className="form-group"><label className="form-label">Phone</label><input className="form-input" name="pPhone" type="tel" required placeholder="+91 98765 43210" /></div>
-              <div className="form-group full"><label className="form-label">Original Diagnosis</label><input className="form-input" name="diag" required placeholder="e.g. Lumbar disc herniation L4-L5" /></div>
-              <div className="form-group full"><label className="form-label">Recommended Treatment</label><input className="form-input" name="treat" required placeholder="e.g. Spinal surgery recommended, cost ₹4.5 lakh" /></div>
-              <div className="form-group"><label className="form-label">Hospital / Doctor</label><input className="form-input" name="hosp" placeholder="e.g. Sterling Hospital" /></div>
-              <div className="form-group"><label className="form-label">Additional Notes</label><textarea className="form-input" name="notes" rows="3" placeholder="Any additional details..." /></div>
+              <div className="form-group"><label className="form-label">{T('so_name', 'Your Name')}</label><input className="form-input" name="pName" required placeholder={T('so_p1', 'Full name')} /></div>
+              <div className="form-group"><label className="form-label">{T('so_phone', 'Phone')}</label><input className="form-input" name="pPhone" type="tel" required placeholder="+91 98765 43210" /></div>
+              <div className="form-group full"><label className="form-label">{T('so_diag', 'Original Diagnosis')}</label><input className="form-input" name="diag" required placeholder={T('so_p2', 'e.g. Lumbar disc herniation L4-L5')} /></div>
+              <div className="form-group full"><label className="form-label">{T('so_treat', 'Recommended Treatment')}</label><input className="form-input" name="treat" required placeholder={T('so_p3', 'e.g. Spinal surgery recommended, cost ₹4.5 lakh')} /></div>
+              <div className="form-group"><label className="form-label">{T('so_hosp', 'Hospital / Doctor')}</label><input className="form-input" name="hosp" placeholder={T('so_p4', 'e.g. Sterling Hospital')} /></div>
+              <div className="form-group"><label className="form-label">{T('so_note', 'Additional Notes')}</label><textarea className="form-input" name="notes" rows="3" placeholder={T('so_p5', 'Any additional details...')} /></div>
             </div>
-            <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: 24 }}>Submit for Second Opinion →</button>
+            <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: 24 }}>{T('so_subBtn', 'Submit for Second Opinion →')}</button>
           </form>
         </div>
       </div>
@@ -875,22 +1053,29 @@ function SecondOpinionPage({ lang, T, showToast }) {
 /* ══════════════════════════════════════════════════════════
    BOOKINGS PAGE
 ══════════════════════════════════════════════════════════ */
-function BookingsPage({ lang, T, go }) {
+function BookingsPage({ lang, T, go, showToast }) {
   const [appts, setAppts] = useState([]);
-  useEffect(() => { api.fetchAppointments().then(d => setAppts(d.appointments)); }, []);
+  const [reload, setReload] = useState(0);
+  useEffect(() => { api.fetchAppointments().then(d => setAppts(d.appointments)); }, [reload]);
+
+  const cancelAppt = async (id) => {
+    await api.updateAppointmentStatus(id, 'Cancelled');
+    showToast('❌ Appointment cancelled successfully.');
+    setReload(r => r + 1);
+  };
 
   return (
     <div className="page">
       <div className="container">
         <div className="page-head">
-          <h1>📅 My Bookings</h1>
-          <p>Your upcoming and past appointments.</p>
+          <h1>📅 {T('my_bks', 'My Bookings')}</h1>
+          <p>{T('my_sub', 'Your upcoming and past appointments.')}</p>
         </div>
         {appts.length === 0 ? (
           <div className="appt-empty">
             <div className="appt-empty-icon">📅</div>
-            <p style={{ fontSize: 18, marginBottom: 16 }}>No bookings yet</p>
-            <button className="btn btn-primary" onClick={() => go('doctors')}>Find a Doctor →</button>
+            <p style={{ fontSize: 18, marginBottom: 16 }}>{T('my_no', 'No bookings yet')}</p>
+            <button className="btn btn-primary" onClick={() => go('doctors')}>{T('my_find', 'Find a Doctor →')}</button>
           </div>
         ) : (
           <div className="appts-grid">
@@ -904,9 +1089,215 @@ function BookingsPage({ lang, T, go }) {
                   {a.concern && <div className="appt-detail" style={{ marginTop: 4 }}>💬 {a.concern}</div>}
                   {a.shareRecords && <div style={{ fontSize: 12, color: 'var(--success)', marginTop: 4 }}>📋 ABHA records shared</div>}
                 </div>
-                <span className="appt-status">{a.status}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                  <span className="appt-status" style={{ background: a.status === 'Cancelled' ? '#fef2f2' : a.status === 'Confirmed' ? '#ecfdf5' : '#f8fafc', color: a.status === 'Cancelled' ? '#dc2626' : a.status === 'Confirmed' ? '#059669' : '#64748b' }}>{a.status}</span>
+                  {a.status === 'Confirmed' && <button className="btn btn-ghost" style={{ fontSize: 12, color: '#dc2626', padding: '4px 8px' }} onClick={() => cancelAppt(a.id)}>Cancel ✕</button>}
+                </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   PHASE 1: AUTHENTICATION & ABHA ONBOARDING
+══════════════════════════════════════════════════════════ */
+function LoginPage({ T, go, showToast, setUser }) {
+  const [step, setStep] = useState(1); // 1: phone, 2: otp, 3: details
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [name, setName] = useState('');
+  const [age, setAge] = useState('');
+  const [city, setCity] = useState('Surat');
+  const [loading, setLoading] = useState(false);
+
+  const handlePhone = async (e) => {
+    e.preventDefault();
+    if (phone.length < 10) return showToast('Please enter a valid 10-digit number');
+    setLoading(true);
+    await api.sendOTP(phone);
+    setLoading(false);
+    setStep(2);
+    showToast('OTP sent securely via WhatsApp 💬');
+  };
+
+  const handleOtp = async (e) => {
+    e.preventDefault();
+    if (otp.length < 4) return;
+    setLoading(true);
+    await api.verifyOTP(phone, otp);
+    setLoading(false);
+    setStep(3); // For demo, assume new user to show complete flow
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    if (!name || !age) return showToast('Please fill required details');
+    setLoading(true);
+    const res = await api.registerPatient({ phone, name, age, city });
+    setLoading(false);
+    setUser(res.user);
+    go('abha-onboarding');
+  };
+
+  return (
+    <div className="section" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+      <div className="card" style={{ maxWidth: 400, width: '100%', margin: '0 auto', boxShadow: '0 20px 40px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div className="logo-mark" style={{ width: 48, height: 48, margin: '0 auto 16px', fontSize: 24 }}>M</div>
+          <h2 style={{ fontSize: 24, fontWeight: 700 }}>{T('login_title', 'Welcome to MediFind')}</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: 8 }}>
+            {T('login_sub', 'Your secure health identity begins here.')}
+          </p>
+        </div>
+
+        {step === 1 && (
+          <form onSubmit={handlePhone}>
+            <div className="form-group">
+              <label className="form-label">{T('login_phone', 'Mobile Number')}</label>
+              <div style={{ display: 'flex' }}>
+                <span style={{ padding: '12px 16px', background: '#f1f5f9', border: '2px solid var(--border)', borderRight: 'none', borderRadius: '12px 0 0 12px', fontWeight: 600 }}>+91</span>
+                <input type="tel" className="form-input" style={{ borderRadius: '0 12px 12px 0' }} placeholder="98765 43210" value={phone} onChange={e => setPhone(e.target.value)} autoFocus required />
+              </div>
+            </div>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+              {loading ? 'Sending OTP...' : T('login_send_otp', 'Send WhatsApp OTP →')}
+            </button>
+            <p style={{ fontSize: 12, textAlign: 'center', color: 'var(--text-muted)', marginTop: 16 }}>By continuing, you agree to our Terms & DPDP Compliant Privacy Policy.</p>
+          </form>
+        )}
+
+        {step === 2 && (
+          <form onSubmit={handleOtp}>
+            <div className="form-group">
+              <label className="form-label">{T('login_enter_otp', 'Enter 6-digit OTP')}</label>
+              <input type="text" className="form-input" placeholder="• • • • • •" value={otp} onChange={e => setOtp(e.target.value)} style={{ letterSpacing: 8, textAlign: 'center', fontSize: 20 }} autoFocus required maxLength={6} />
+              <div style={{ textAlign: 'right', marginTop: 8, fontSize: 13 }}>
+                <a href="#" style={{ color: 'var(--primary)' }} onClick={() => setStep(1)}>Change Number</a>
+              </div>
+            </div>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+              {loading ? 'Verifying...' : T('login_verify', 'Verify & Secure Login')}
+            </button>
+          </form>
+        )}
+
+        {step === 3 && (
+          <form onSubmit={handleRegister}>
+            <div className="form-group">
+              <label className="form-label">{T('reg_name', 'Full Name')}</label>
+              <input type="text" className="form-input" placeholder="e.g. Ramesh Patel" value={name} onChange={e => setName(e.target.value)} required />
+            </div>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label className="form-label">{T('reg_age', 'Age')}</label>
+                <input type="number" className="form-input" placeholder="Years" value={age} onChange={e => setAge(e.target.value)} required />
+              </div>
+              <div className="form-group" style={{ flex: 2 }}>
+                <label className="form-label">{T('reg_city', 'City')}</label>
+                <input type="text" className="form-input" value={city} onChange={e => setCity(e.target.value)} required disabled />
+              </div>
+            </div>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+              {loading ? 'Creating Profile...' : T('reg_complete', 'Complete Profile →')}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ABHAOnboardingPage({ T, go, showToast, user, setUser }) {
+  const [step, setStep] = useState('intro'); // intro, create, link
+  const [aadharOtp, setAadharOtp] = useState('');
+  const [abhaNum, setAbhaNum] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const skip = () => {
+    showToast('You can link your ABHA later from Health Records.');
+    go('home');
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const res = await api.generateABHA(user?.phone, aadharOtp);
+    setLoading(false);
+    setUser({ ...user, abhaLinked: true, abhaId: res.abhaId });
+    showToast('✅ ABHA ID created and linked successfully!');
+    go('records');
+  };
+
+  const handleLink = async (e) => {
+    e.preventDefault();
+    if (abhaNum.length < 14) return;
+    setLoading(true);
+    await api.linkABHA(abhaNum);
+    setLoading(false);
+    setUser({ ...user, abhaLinked: true, abhaId: abhaNum });
+    showToast('✅ Account linked to ABHA ecosystem!');
+    go('records');
+  };
+
+  return (
+    <div className="section" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+      <div className="card" style={{ maxWidth: 480, width: '100%', margin: '0 auto', borderTop: '4px solid #1C52A0' }}>
+
+        {step === 'intro' && (
+          <div style={{ textAlign: 'center' }}>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Ayushman_Bharat_Digital_Mission_Logo.svg" alt="ABDM Logo" style={{ height: 60, margin: '0 auto 24px', maxWidth: '100%', objectFit: 'contain' }} />
+            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>{T('abha_title', 'Unlock Your Digital Health Record')}</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 15, lineHeight: 1.6 }}>
+              {T('abha_desc', 'MediFind is an official partner of Ayushman Bharat Digital Mission (ABDM). Linking an ABHA ID allows you to securely share old reports with new doctors and avoid repeating expensive tests.')}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+              <button className="btn btn-primary btn-lg" style={{ background: '#1C52A0', borderColor: '#1C52A0' }} onClick={() => setStep('create')}>
+                Create New ABHA ID (1 min)
+              </button>
+              <button className="btn btn-outline btn-lg" onClick={() => setStep('link')}>
+                I already have an ABHA ID
+              </button>
+            </div>
+
+            <button className="btn btn-ghost" onClick={skip}>Skip for now, I'll do this later</button>
+          </div>
+        )}
+
+        {step === 'create' && (
+          <div style={{ textAlign: 'left' }}>
+            <h3 style={{ fontSize: 20, marginBottom: 16 }}>Create via Aadhaar OTP</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 20 }}>An OTP has been sent to the Aadhaar-linked mobile number for <strong>{user?.phone}</strong>.</p>
+            <form onSubmit={handleCreate}>
+              <div className="form-group">
+                <label className="form-label">Aadhaar OTP</label>
+                <input type="text" className="form-input" placeholder="• • • • • •" value={aadharOtp} onChange={e => setAadharOtp(e.target.value)} required autoFocus />
+              </div>
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ background: '#1C52A0', borderColor: '#1C52A0', color: 'white' }}>
+                {loading ? 'Creating ABHA ID...' : 'Verify & Generate ABHA Profile'}
+              </button>
+              <button type="button" className="btn btn-ghost btn-full" onClick={() => setStep('intro')} style={{ marginTop: 8 }}>← Back</button>
+            </form>
+          </div>
+        )}
+
+        {step === 'link' && (
+          <div style={{ textAlign: 'left' }}>
+            <h3 style={{ fontSize: 20, marginBottom: 16 }}>Link Existing ABHA</h3>
+            <form onSubmit={handleLink}>
+              <div className="form-group">
+                <label className="form-label">14-Digit ABHA Number</label>
+                <input type="text" className="form-input" placeholder="91-XXXX-XXXX-XXXX" value={abhaNum} onChange={e => setAbhaNum(e.target.value)} required autoFocus />
+              </div>
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ background: '#1C52A0', borderColor: '#1C52A0', color: 'white' }}>
+                {loading ? 'Linking...' : 'Send OTP to Link Account'}
+              </button>
+              <button type="button" className="btn btn-ghost btn-full" onClick={() => setStep('intro')} style={{ marginTop: 8 }}>← Back</button>
+            </form>
           </div>
         )}
       </div>
